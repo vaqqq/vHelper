@@ -1,0 +1,8 @@
+tunnel: github-app
+credentials-file: C:\Users\maxma\.cloudflared\5f8ca49c-839d-40fa-a9c5-72c179779fbf.json
+
+ingress:
+  - hostname: github-app.vaq.lol
+    path: /webhooks
+    service: http://localhost:3000
+  - service: http_status:403

@@ -1,0 +1,32 @@
+{
+  "name": "vhelper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "concurrently -n cf-tunnel,bot -c magenta,green -p name \"pnpm tunnel\" \"pnpm start\"",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "tunnel": "cloudflared tunnel run github-app"
+  },
+  "keywords": [],
+  "type": "module",
+  "author": "Vaq",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.15.21",
+    "concurrently": "^9.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@octokit/auth-app": "^8.0.1",
+    "@octokit/rest": "^21.1.1",
+    "@octokit/webhooks": "^14.0.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "node-fetch": "^3.3.2",
+    "pterodactyl.ts": "^1.2.1"
+  }
+}

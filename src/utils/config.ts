@@ -1,5 +1,5 @@
 import { Octokit } from "@octokit/rest";
-import { CybranceeConfig } from "../interfaces/cybrancee.config";
+import { CybranceeConfig } from "../interfaces/cybrancee.config.js";
 
 export async function getFileFromRepo(
   octokit: Octokit,

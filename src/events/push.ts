@@ -1,6 +1,6 @@
 import { Octokit } from "@octokit/rest";
-import { restartServer } from "../utils/pterodactyl";
-import { loadCybranceeConfig } from "../utils/config-loader";
+import { restartServer } from "../utils/pterodactyl.js";
+import { loadCybranceeConfig } from "../utils/config-loader.js";
 
 export async function handlePush(payload: any, octokit: Octokit) {
   const fullRepo = payload.repository.full_name;

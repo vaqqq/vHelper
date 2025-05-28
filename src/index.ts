@@ -3,9 +3,12 @@ import { Webhooks } from "@octokit/webhooks";
 import { Octokit } from "@octokit/rest";
 import { createAppAuth } from "@octokit/auth-app";
 import dotenv from "dotenv";
+import helmet from "helmet";
 
 import { handlePush } from "./events/push.js";
 import { handleIssue } from "./events/issue.js";
+import { getInstallations } from "./utils/github/installations.js";
+
 
 dotenv.config();
 
@@ -47,6 +50,8 @@ webhooks.on("issues.opened", async ({ payload }) => {
 });
 
 const app = express();
+app.disable("x-powered-by");
+app.use(helmet());
 
 app.post("/webhooks", express.raw({ type: "*/*" }), async (req, res) => {
   try {
@@ -66,42 +71,29 @@ app.post("/webhooks", express.raw({ type: "*/*" }), async (req, res) => {
 
 app.get("/", async (req, res) => {
   try {
-    const auth = createAppAuth({
+    const installationCount = await getInstallations({
       appId: process.env.APP_ID!,
       privateKey,
     });
 
-    const { token } = await auth({ type: "app" });
-    const octokit = new Octokit({ auth: token });
-
-    const installations = await octokit.rest.apps.listInstallations();
-    let repoCount = 0;
-
-    for (const installation of installations.data) {
-      const instAuth = await auth({ type: "installation", installationId: installation.id });
-      const instClient = new Octokit({ auth: instAuth.token });
-      const repos = await instClient.rest.apps.listReposAccessibleToInstallation();
-      repoCount += repos.data.repositories.length;
-    }
-
     res.json({
       data: {
         info: "VHelper is a GitHub App integration that enables automated deployments and server actions for Cybrancee. Learn more at: https://github.com/vaqqq/vhelper",
-        monitored_repositories: repoCount,
-      },
+        installations: installationCount,      },
       success: true,
     });
   } catch (err) {
-    console.error("Error fetching repo count:", err);
+    console.error("Error fetching installation count:", err);
     res.status(500).json({
       data: {
-        info: "Unable to fetch repository data.",
-        monitored_repositories: "unknown",
+        info: "Unable to fetch installation data.",
+        installations: "unknown",
       },
       success: false,
     });
   }
 });
+
 
 app.listen(3000, () => {
   console.log("Server listening at http://localhost:3000");

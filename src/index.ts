@@ -9,7 +9,6 @@ import { handleIssue } from "./events/issue.js";
 
 dotenv.config();
 
-const repo = process.env.REPOSITORY!;
 const privateKey = process.env.PRIVATE_KEY!
   .replace(/\\n/g, '\n')
   .replace('-----BEGIN RSA PRIVATE KEY-----', '-----BEGIN RSA PRIVATE KEY-----\n')
@@ -18,8 +17,14 @@ const privateKey = process.env.PRIVATE_KEY!
 const webhooks = new Webhooks({ secret: process.env.WEBHOOK_SECRET! });
 
 webhooks.on("push", async ({ payload }) => {
-  if (payload.repository.full_name !== repo) return;
-  const auth = createAppAuth({ appId: process.env.APP_ID!, privateKey, installationId: payload.installation!.id });
+  const installationId = payload.installation!.id;
+
+  const auth = createAppAuth({
+    appId: process.env.APP_ID!,
+    privateKey,
+    installationId,
+  });
+
   const { token } = await auth({ type: "installation" });
   const octokit = new Octokit({ auth: token });
 
@@ -27,8 +32,14 @@ webhooks.on("push", async ({ payload }) => {
 });
 
 webhooks.on("issues.opened", async ({ payload }) => {
-  if (payload.repository.full_name !== repo) return;
-  const auth = createAppAuth({ appId: process.env.APP_ID!, privateKey, installationId: payload.installation!.id });
+  const installationId = payload.installation!.id;
+
+  const auth = createAppAuth({
+    appId: process.env.APP_ID!,
+    privateKey,
+    installationId,
+  });
+
   const { token } = await auth({ type: "installation" });
   const octokit = new Octokit({ auth: token });
 
@@ -36,6 +47,7 @@ webhooks.on("issues.opened", async ({ payload }) => {
 });
 
 const app = express();
+
 app.post("/webhooks", express.raw({ type: "*/*" }), async (req, res) => {
   try {
     await webhooks.verifyAndReceive({
@@ -49,6 +61,45 @@ app.post("/webhooks", express.raw({ type: "*/*" }), async (req, res) => {
   } catch (error) {
     console.error("Webhook error:", error);
     res.status(400).send("Invalid signature");
+  }
+});
+
+app.get("/", async (req, res) => {
+  try {
+    const auth = createAppAuth({
+      appId: process.env.APP_ID!,
+      privateKey,
+    });
+
+    const { token } = await auth({ type: "app" });
+    const octokit = new Octokit({ auth: token });
+
+    const installations = await octokit.rest.apps.listInstallations();
+    let repoCount = 0;
+
+    for (const installation of installations.data) {
+      const instAuth = await auth({ type: "installation", installationId: installation.id });
+      const instClient = new Octokit({ auth: instAuth.token });
+      const repos = await instClient.rest.apps.listReposAccessibleToInstallation();
+      repoCount += repos.data.repositories.length;
+    }
+
+    res.json({
+      data: {
+        info: "VHelper is a GitHub App integration that enables automated deployments and server actions for Cybrancee. Learn more at: https://github.com/vaqqq/vhelper",
+        monitored_repositories: repoCount,
+      },
+      success: true,
+    });
+  } catch (err) {
+    console.error("Error fetching repo count:", err);
+    res.status(500).json({
+      data: {
+        info: "Unable to fetch repository data.",
+        monitored_repositories: "unknown",
+      },
+      success: false,
+    });
   }
 });
 

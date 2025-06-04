@@ -27,7 +27,7 @@ export async function applyServerConfig({
   }
 
   if (config.entryFile) {
-    environmentVars["ENTRY_FILE"] = config.entryFile;
+    environmentVars["BOT_JS_FILE"] = config.entryFile;
   }
 
   try {

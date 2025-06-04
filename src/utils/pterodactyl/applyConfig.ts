@@ -20,47 +20,28 @@ export async function applyServerConfig({
     Accept: "Application/vnd.pterodactyl.v1+json",
   };
 
-  try {
-    /*const startupCommand = config.entryFile
-      ? `/usr/local/bin/node /home/container/${config.entryFile}`
-      : undefined;
+  const environmentVars: Record<string, string> = {};
 
-    if (startupCommand) {
-      await axios.patch(
-        `${panelUrl}/api/application/servers/${serverId}/startup`,
-        {
-          startup: startupCommand,
-        },
+  if (typeof config.npmInstall === "boolean") {
+    environmentVars["NPM_INSTALL"] = config.npmInstall ? "1" : "0";
+  }
+
+  if (config.entryFile) {
+    environmentVars["ENTRY_FILE"] = config.entryFile;
+  }
+
+  try {
+    for (const [key, value] of Object.entries(environmentVars)) {
+      await axios.put(
+        `${panelUrl}/api/client/servers/${serverId}/startup/variable`,
+        { key, value },
         { headers }
       );
-    }*/
-
-    const environmentVars: Record<string, string> = {};
-
-    if (typeof config.npmInstall === "boolean") {
-      environmentVars["NPM_INSTALL"] = config.npmInstall ? "1" : "0";
     }
 
-    if (config.entryFile) {
-      environmentVars["ENTRY_FILE"] = config.entryFile;
-    }
-
-    if (Object.keys(environmentVars).length > 0) {
-      for (const [key, value] of Object.entries(environmentVars)) {
-        await axios.put(
-          `${panelUrl}/api/application/servers/${serverId}/startup/variable`,
-          {
-            key,
-            value,
-          },
-          { headers }
-        );
-      }
-    }
-
-    console.log("Server config applied using current CybranceeConfig");
+    console.log("Server config updated via client API.");
   } catch (error: any) {
-    console.error("Failed to apply server config:", error?.response?.data || error.message);
+    console.error("Failed to apply config:", error?.response?.data || error.message);
     throw error;
   }
 }

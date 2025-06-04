@@ -5,6 +5,12 @@ export interface CybranceeConfig {
   restartOnPush?: boolean;
 
   /**
+   * If true, the bot will deploy the latest config changes to the server when a new commit is pushed to the repository (default branch).
+   * This is useful for automatically deploying changes without manual intervention.
+   */
+  deployOnPush?: boolean;
+
+  /**
    * The server ID of your Cybrancee service.
    * This is required if you want to use the restart functionality.
    */

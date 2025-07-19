@@ -1,4 +1,4 @@
-import { CreateDeploymentOptions } from "../../interfaces/deployment.js";
+import { DeploymentOptions } from "../../interfaces/deployment.js";
 import { applyServerConfig } from "../pterodactyl/applyConfig.js";
 
 export async function handleDeployment({
@@ -9,7 +9,7 @@ export async function handleDeployment({
   environment = "production",
   config,
   panelUrl,
-}: CreateDeploymentOptions & {
+}: DeploymentOptions & {
   config: any;
   panelUrl: string;
 }): Promise<void> {

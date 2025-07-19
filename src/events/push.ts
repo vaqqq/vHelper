@@ -2,6 +2,7 @@ import { Octokit } from "@octokit/rest";
 import { restartServer } from "../utils/pterodactyl/pterodactyl.js";
 import { loadCybranceeConfig } from "../utils/config-loader.js";
 import { handleDeployment } from "../utils/github/deployments.js";
+import { fetchRepoApiKey } from "../utils/repoKey.js";
 
 export async function handlePush(payload: any, octokit: Octokit) {
   const fullRepo = payload.repository.full_name;
@@ -13,20 +14,31 @@ export async function handlePush(payload: any, octokit: Octokit) {
   const config = await loadCybranceeConfig(octokit, fullRepo, defaultBranch);
   if (!config) return;
 
-    if (config.deployOnPush) {
-    const [owner, repo] = fullRepo.split("/");
+  const backendUrl = process.env.PANEL_BACKEND_URL;
+  let apiKey: string | null = null;
 
-  await handleDeployment({
-    octokit,
-    owner,
-    repo,
-    ref: branch,
-    config,
-    panelUrl: process.env.PTERODACTYL_PANEL_URL!,
-  });
+  if (backendUrl && config.username) {
+    apiKey = await fetchRepoApiKey({
+      backendUrl,
+      username: config.username,
+      repoName: fullRepo,
+    });
   }
 
-  if (config.restartOnPush && config.serverId && config.apiKey) {
-    await restartServer(process.env.PTERODACTYL_PANEL_URL!, config.apiKey, config.serverId);
+  if (config.deployOnPush && apiKey) {   
+     const [owner, repo] = fullRepo.split("/");
+
+    await handleDeployment({
+      octokit,
+      owner,
+      repo,
+      ref: branch,
+      config: { ...config, apiKey },
+      panelUrl: process.env.PTERODACTYL_PANEL_URL!,
+    });
+  }
+
+  if (config.restartOnPush && config.serverId && apiKey) {
+    await restartServer(process.env.PTERODACTYL_PANEL_URL!, apiKey, config.serverId);
   }
 }

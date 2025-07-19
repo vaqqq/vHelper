@@ -1,6 +1,6 @@
 import { Octokit } from "@octokit/rest";
 
-export interface CreateDeploymentOptions {
+export interface DeploymentOptions {
   octokit: Octokit;
   owner: string;
   repo: string;

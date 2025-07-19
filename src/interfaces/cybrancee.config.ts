@@ -17,22 +17,33 @@ export interface CybranceeConfig {
   serverId?: string;
 
   /**
-   * The API key for the Cybrancee Pterodactyl panel.
-   * This is required if you want to use the restart functionality.
-   */
-  apiKey?: string;
-
-
-  /**
    * If true, the server will install npm packages when it starts.
    */
   npmInstall?: boolean;
+
+  /**
+   * If true, the server will install node packages when it starts.
+   * This is useful for installing specific Node.js packages required by your application.
+   */
+  nodePackages?: string[];
 
   /**
    * The entry file of your application.
    * This is the main file that will be executed when the server starts.
    */
   entryFile?: string;
+
+  /**
+   * The username of the Github account that owns the repository.
+   * This is required for Cybrancee to access the repository and fetch the latest commits.
+   */
+  username?: string;
+
+  /**
+   * The url of the Github repository.
+   * This is required for Cybrancee to access the repository and fetch the latest commits.
+   */
+  repositoryUrl?: string;
 
   /**
    * Additional configuration options.

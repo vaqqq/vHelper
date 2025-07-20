@@ -1,4 +1,4 @@
-interface repoKeyOptions {
+export interface repoKeyOptions {
   backendUrl: string;
   username: string;
   repoName: string;

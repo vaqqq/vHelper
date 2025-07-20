@@ -1,9 +1,9 @@
 import axios from "axios";
+import { repoKeyOptions } from "../interfaces/repoKey.js";
 
 export async function fetchRepoApiKey({ backendUrl, username, repoName, token  }: repoKeyOptions): Promise<string | null> {
   try {
-    TODO:"add repository as a parameter"
-    const res = await axios.get(`${backendUrl}/get/repo_keys`, {
+    const res = await axios.get(`${backendUrl}/get/${encodeURIComponent(repoName)}`, {
       params: { uid: username },
       headers: { Authorization: `Bearer ${token}` }
     });

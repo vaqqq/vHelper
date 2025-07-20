@@ -1,9 +1,10 @@
 import axios from "axios";
 
-export async function fetchRepoApiKey({ backendUrl, username, repoName }: repoKeyOptions): Promise<string | null> {
+export async function fetchRepoApiKey({ backendUrl, username, repoName, token  }: repoKeyOptions): Promise<string | null> {
   try {
     const res = await axios.get(`${backendUrl}/get/repo_keys`, {
-      params: { uid: username }
+      params: { uid: username },
+      headers: { Authorization: `Bearer ${token}` }
     });
     if (Array.isArray(res.data)) {
       const entry = res.data.find((r: any) => r.repo_name === repoName);

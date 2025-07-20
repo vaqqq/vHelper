@@ -14,14 +14,17 @@ export async function handlePush(payload: any, octokit: Octokit) {
   const config = await loadCybranceeConfig(octokit, fullRepo, defaultBranch);
   if (!config) return;
 
-  const backendUrl = process.env.PANEL_BACKEND_URL;
+  const backendUrl = process.env.BACKEND_URL;
+  const backendToken = process.env.BACKEND_TOKEN;
   let apiKey: string | null = null;
 
   if (backendUrl && config.username) {
+    if (!backendToken) return;
     apiKey = await fetchRepoApiKey({
       backendUrl,
       username: config.username,
       repoName: fullRepo,
+      token: backendToken,
     });
   }
 
